@@ -2,7 +2,9 @@ use starknet::ContractAddress;
 
 #[starknet::interface]
 pub trait IERC20<TState> {
-    fn transfer_from(ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool;
+    fn transfer_from(
+        ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256,
+    ) -> bool;
     fn transfer(ref self: TState, recipient: ContractAddress, amount: u256) -> bool;
 }
 
@@ -16,18 +18,20 @@ pub struct MichiSession {
 
 #[starknet::interface]
 pub trait IMichiPay<TContractState> {
-    fn create_session(ref self: TContractState, total_amount: u256, participants: Array<ContractAddress>) -> u32;
+    fn create_session(
+        ref self: TContractState, total_amount: u256, participants: Array<ContractAddress>,
+    ) -> u32;
     fn pay_share(ref self: TContractState, session_id: u32);
     fn claim_funds(ref self: TContractState, session_id: u32);
 }
 
 #[starknet::contract]
 pub mod MichiPayContract {
-    use super::{MichiSession, IERC20Dispatcher, IERC20DispatcherTrait};
-    use starknet::{ContractAddress, get_caller_address, get_contract_address};
     use starknet::storage::{
-        Map, StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry
+        Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
+    use starknet::{ContractAddress, get_caller_address, get_contract_address};
+    use super::{IERC20Dispatcher, IERC20DispatcherTrait, MichiSession};
 
     #[storage]
     struct Storage {
@@ -35,7 +39,6 @@ pub mod MichiPayContract {
         session_counter: u32,
         sessions: Map<u32, MichiSession>,
         debts: Map<(u32, ContractAddress), u256>,
-
     }
 
     #[event]
@@ -47,13 +50,25 @@ pub mod MichiPayContract {
     }
 
     #[derive(Drop, starknet::Event)]
-    pub struct SessionCreated { pub session_id: u32, pub creator: ContractAddress, pub total_amount: u256 }
-    
+    pub struct SessionCreated {
+        pub session_id: u32,
+        pub creator: ContractAddress,
+        pub total_amount: u256,
+    }
+
     #[derive(Drop, starknet::Event)]
-    pub struct SharePaid { pub session_id: u32, pub participant: ContractAddress, pub amount: u256 }
-    
+    pub struct SharePaid {
+        pub session_id: u32,
+        pub participant: ContractAddress,
+        pub amount: u256,
+    }
+
     #[derive(Drop, starknet::Event)]
-    pub struct FundsClaimed { pub session_id: u32, pub creator: ContractAddress, pub amount: u256 }
+    pub struct FundsClaimed {
+        pub session_id: u32,
+        pub creator: ContractAddress,
+        pub amount: u256,
+    }
 
     #[constructor]
     fn constructor(ref self: ContractState, strk_address: ContractAddress) {
@@ -62,7 +77,9 @@ pub mod MichiPayContract {
 
     #[abi(embed_v0)]
     impl MichiPayImpl of super::IMichiPay<ContractState> {
-        fn create_session(ref self: ContractState, total_amount: u256, participants: Array<ContractAddress>) -> u32 {
+        fn create_session(
+            ref self: ContractState, total_amount: u256, participants: Array<ContractAddress>,
+        ) -> u32 {
             let num_participants = participants.len();
             assert(num_participants >= 2, 'Minimo 2 participantes');
             assert(num_participants <= 5, 'Maximo 5 participantes');
@@ -74,22 +91,21 @@ pub mod MichiPayContract {
 
             let mut i: usize = 0;
             loop {
-                if i == num_participants { break; }
+                if i == num_participants {
+                    break;
+                }
                 let participant_address = *participants.at(i);
                 self.debts.entry((session_id, participant_address)).write(amount_per_person);
                 i += 1;
-            };
+            }
 
             let new_session = MichiSession {
-                creator: creator,
-                total_amount: total_amount,
-                amount_collected: 0,
-                is_active: true,
+                creator: creator, total_amount: total_amount, amount_collected: 0, is_active: true,
             };
-            
+
             self.sessions.entry(session_id).write(new_session);
             self.session_counter.write(session_id);
-            
+
             self.emit(SessionCreated { session_id, creator, total_amount });
             session_id
         }
@@ -98,7 +114,7 @@ pub mod MichiPayContract {
             let caller = get_caller_address();
             let amount_owed = self.debts.entry((session_id, caller)).read();
             assert(amount_owed > 0, 'No tienes deuda o ya pagaste');
-            
+
             let mut session = self.sessions.entry(session_id).read();
             assert(session.is_active, 'La sesion no esta activa');
 
@@ -109,7 +125,7 @@ pub mod MichiPayContract {
             let strk_address = self.strk_token_address.read();
             let strk_dispatcher = IERC20Dispatcher { contract_address: strk_address };
             let this_contract = get_contract_address();
-            
+
             let success = strk_dispatcher.transfer_from(caller, this_contract, amount_owed);
             assert(success, 'Fallo transferencia STRK');
 
@@ -119,7 +135,7 @@ pub mod MichiPayContract {
         fn claim_funds(ref self: ContractState, session_id: u32) {
             let caller = get_caller_address();
             let mut session = self.sessions.entry(session_id).read();
-            
+
             assert(caller == session.creator, 'Solo creador puede retirar');
             assert(session.is_active, 'Sesion ya cerrada');
             assert(session.amount_collected > 0, 'No hay fondos');
@@ -131,7 +147,7 @@ pub mod MichiPayContract {
 
             let strk_address = self.strk_token_address.read();
             let strk_dispatcher = IERC20Dispatcher { contract_address: strk_address };
-            
+
             let success = strk_dispatcher.transfer(caller, amount_to_transfer);
             assert(success, 'Fallo el retiro');
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 type AddressBookEntries = Record<string, string>;
 
@@ -12,12 +12,12 @@ export const useAddressBook = () => {
   // Load from local storage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('michipay_address_book');
+      const stored = localStorage.getItem("michipay_address_book");
       if (stored) {
         setContacts(JSON.parse(stored));
       }
     } catch (e) {
-      console.error('Failed to load address book from local storage', e);
+      console.error("Failed to load address book from local storage", e);
     } finally {
       setIsLoaded(true);
     }
@@ -27,25 +27,25 @@ export const useAddressBook = () => {
   useEffect(() => {
     if (isLoaded) {
       try {
-        localStorage.setItem('michipay_address_book', JSON.stringify(contacts));
+        localStorage.setItem("michipay_address_book", JSON.stringify(contacts));
       } catch (e) {
-        console.error('Failed to save address book to local storage', e);
+        console.error("Failed to save address book to local storage", e);
       }
     }
   }, [contacts, isLoaded]);
 
   const addContact = (name: string, address: string) => {
     if (!name.trim() || !address.trim()) return false;
-    
-    setContacts(prev => ({
+
+    setContacts((prev) => ({
       ...prev,
-      [name]: address.trim()
+      [name]: address.trim(),
     }));
     return true;
   };
 
   const removeContact = (name: string) => {
-    setContacts(prev => {
+    setContacts((prev) => {
       const updated = { ...prev };
       delete updated[name];
       return updated;
@@ -70,6 +70,6 @@ export const useAddressBook = () => {
     addContact,
     removeContact,
     getAddressByName,
-    getSuggestions
+    getSuggestions,
   };
 };

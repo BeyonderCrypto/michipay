@@ -15,7 +15,7 @@ export const fetchPrice = async (retries = 3): Promise<number> => {
       // Fallback to Coingecko directly if the local API fails
       try {
         const fallbackResponse = await fetch(
-          "https://api.coingecko.com/api/v3/simple/price?ids=starknet&vs_currencies=usd"
+          "https://api.coingecko.com/api/v3/simple/price?ids=starknet&vs_currencies=usd",
         );
         const fallbackData = await fallbackResponse.json();
         if (fallbackData?.starknet?.usd !== undefined) {
@@ -27,7 +27,7 @@ export const fetchPrice = async (retries = 3): Promise<number> => {
           fallbackError,
         );
       }
-      
+
       attempt++;
       if (attempt === retries) {
         console.error(`Failed to fetch price after ${retries} attempts.`);

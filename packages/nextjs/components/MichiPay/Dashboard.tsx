@@ -8,7 +8,7 @@ export const Dashboard = () => {
 
   // Assuming `get_sessions` or similar read function exists in the contract,
   // we are using scaffold's read hook. Adjust `functionName` based on actual ABI.
-  // Note: For array of sessions, we might need a specific read method or L2 indexer, 
+  // Note: For array of sessions, we might need a specific read method or L2 indexer,
   // but for the sake of the tutorial, we read mapping data if available.
   const { data: userDebt, isLoading: isDebtLoading } = useScaffoldReadContract({
     contractName: "MichiPayContract",
@@ -20,10 +20,12 @@ export const Dashboard = () => {
     <div className="card bg-base-100 shadow-xl mt-4 border border-base-300">
       <div className="card-body">
         <h2 className="card-title text-2xl mb-4">Your Dashboard</h2>
-        
+
         <div className="stats shadow bg-secondary text-secondary-content">
           <div className="stat">
-            <div className="stat-title text-secondary-content/80">Total Outstanding Debt</div>
+            <div className="stat-title text-secondary-content/80">
+              Total Outstanding Debt
+            </div>
             <div className="stat-value text-3xl">
               {isDebtLoading ? (
                 <span className="loading loading-dots loading-md"></span>
@@ -34,7 +36,9 @@ export const Dashboard = () => {
                 "0.00 STRK"
               )}
             </div>
-            <div className="stat-desc text-secondary-content/80">Across all active sessions</div>
+            <div className="stat-desc text-secondary-content/80">
+              Across all active sessions
+            </div>
           </div>
         </div>
 
@@ -52,7 +56,10 @@ export const Dashboard = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td colSpan={3} className="text-center italic opacity-60 py-4">
+                  <td
+                    colSpan={3}
+                    className="text-center italic opacity-60 py-4"
+                  >
                     Fetching session data...
                   </td>
                 </tr>
@@ -60,7 +67,6 @@ export const Dashboard = () => {
             </table>
           </div>
         </div>
-
       </div>
     </div>
   );

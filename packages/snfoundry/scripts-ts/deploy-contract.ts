@@ -227,36 +227,62 @@ const declareIfNot_NotWait = async (
       estimatedTip = await estimateTip();
       retryInterval = estimateRetryInterval(payload);
     } catch (innerE: any) {
-      const errorString = typeof innerE === 'object' ? JSON.stringify(innerE, null, 2) : innerE.toString();
+      const errorString =
+        typeof innerE === "object"
+          ? JSON.stringify(innerE, null, 2)
+          : innerE.toString();
       const match = errorString.match(/Expected:\s+(0x[a-fA-F0-9]+)/);
       if (match) {
         const expectedHash = match[1];
-        console.log(yellow("Mismatch compiled class hash detected during fee estimation!"));
+        console.log(
+          yellow("Mismatch compiled class hash detected during fee estimation!")
+        );
         console.log(yellow("Node expected: "), expectedHash);
-        console.log(yellow("Retrying fee estimation and deployment with the exact 0x hash expected by the network..."));
-        
+        console.log(
+          yellow(
+            "Retrying fee estimation and deployment with the exact 0x hash expected by the network..."
+          )
+        );
+
         finalClassHash = expectedHash;
-        fixedPayload = { contract: payload.contract, compiledClassHash: expectedHash };
-        
+        fixedPayload = {
+          contract: payload.contract,
+          compiledClassHash: expectedHash,
+        };
+
         try {
-          estimatedDeclareFee = await estimateDeclareFee(fixedPayload, expectedHash);
+          estimatedDeclareFee = await estimateDeclareFee(
+            fixedPayload,
+            expectedHash
+          );
           estimatedTip = await estimateTip();
           retryInterval = estimateRetryInterval(fixedPayload);
         } catch (retryE: any) {
-           if (retryE.toString().includes("already declared") || retryE.toString().includes("ALREADY_DECLARED")) {
-             console.log(green("The magically discovered class hash is ALREADY declared! Skipping declare."));
-             return { classHash: expectedHash };
-           }
-           throw retryE;
+          if (
+            retryE.toString().includes("already declared") ||
+            retryE.toString().includes("ALREADY_DECLARED")
+          ) {
+            console.log(
+              green(
+                "The magically discovered class hash is ALREADY declared! Skipping declare."
+              )
+            );
+            return { classHash: expectedHash };
+          }
+          throw retryE;
         }
       } else {
         throw innerE;
       }
     }
 
-    console.log(yellow(`Estimated declare fee: ${estimatedDeclareFee.toString()}`));
+    console.log(
+      yellow(`Estimated declare fee: ${estimatedDeclareFee.toString()}`)
+    );
     console.log(yellow(`Estimated tip: ${estimatedTip.toString()}`));
-    console.log(yellow(`Estimated retry interval: ${retryInterval.toString()}`));
+    console.log(
+      yellow(`Estimated retry interval: ${retryInterval.toString()}`)
+    );
 
     const declareOptions = {
       ...options,
@@ -264,14 +290,13 @@ const declareIfNot_NotWait = async (
       estimated_tip: estimatedDeclareFee,
     };
 
-    const result = await deployer.declare(
-      fixedPayload,
-      declareOptions
-    );
+    const result = await deployer.declare(fixedPayload, declareOptions);
     const transaction_hash = result.transaction_hash;
 
     if (networkName === "sepolia" || networkName === "mainnet") {
-      console.log(yellow("Waiting for declaration transaction to be accepted..."));
+      console.log(
+        yellow("Waiting for declaration transaction to be accepted...")
+      );
       const receipt = await provider.waitForTransaction(transaction_hash, {
         retryInterval,
       });
@@ -280,16 +305,26 @@ const declareIfNot_NotWait = async (
       if (receiptAny.execution_status !== "SUCCEEDED") {
         console.log(
           red("Declaration transaction receipt:"),
-          JSON.stringify(receipt, (_, v) => (typeof v === "bigint" ? v.toString() : v), 2)
+          JSON.stringify(
+            receipt,
+            (_, v) => (typeof v === "bigint" ? v.toString() : v),
+            2
+          )
         );
         const revertReason = receiptAny.revert_reason || "Unknown reason";
-        throw new Error(red(`Declaration failed or reverted. Reason: ${revertReason}`));
+        throw new Error(
+          red(`Declaration failed or reverted. Reason: ${revertReason}`)
+        );
       }
       console.log(green("Declaration successful"));
       console.log(yellow("Declaration fee:"), receiptAny.actual_fee);
-      
-      console.log(yellow("Waiting 25 seconds for node replication so we can safely estimate the deploy fee..."));
-      await new Promise(resolve => setTimeout(resolve, 25000));
+
+      console.log(
+        yellow(
+          "Waiting 25 seconds for node replication so we can safely estimate the deploy fee..."
+        )
+      );
+      await new Promise((resolve) => setTimeout(resolve, 25000));
     }
 
     return {

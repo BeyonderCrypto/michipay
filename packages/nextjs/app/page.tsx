@@ -8,7 +8,9 @@ const Home = () => {
       <div className="px-5 w-full max-w-4xl text-center">
         <h1 className="text-center">
           <span className="block text-2xl mb-2">Welcome to</span>
-          <span className="block text-4xl font-bold text-primary">MichiPay</span>
+          <span className="block text-4xl font-bold text-primary">
+            MichiPay
+          </span>
         </h1>
         <p className="text-xl mb-4 text-base-content/80 font-medium tracking-wide">
           Split bills easily on Starknet L2.
@@ -22,10 +24,10 @@ const Home = () => {
           <div className="flex-1 w-full">
             <Dashboard />
           </div>
-          
+
           {/* Right Column: Create Session */}
           <div className="flex-1 w-full shrink-0 lg:max-w-md">
-             <SessionCreator />
+            <SessionCreator />
           </div>
         </div>
       </div>
