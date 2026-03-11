@@ -9,14 +9,32 @@ export const fetchPrice = async (retries = 3): Promise<number> => {
       return data.starknet.usd;
     } catch (error) {
       console.error(
-        `Attempt ${attempt + 1} - Error fetching STRK price from Coingecko: `,
+        `Attempt ${attempt + 1} - Error fetching STRK price from local API: `,
         error,
       );
+      // Fallback to Coingecko directly if the local API fails
+      try {
+        const fallbackResponse = await fetch(
+          "https://api.coingecko.com/api/v3/simple/price?ids=starknet&vs_currencies=usd"
+        );
+        const fallbackData = await fallbackResponse.json();
+        if (fallbackData?.starknet?.usd !== undefined) {
+          return fallbackData.starknet.usd;
+        }
+      } catch (fallbackError) {
+        console.error(
+          `Attempt ${attempt + 1} - Error fetching STRK price from Coingecko directly: `,
+          fallbackError,
+        );
+      }
+      
       attempt++;
       if (attempt === retries) {
         console.error(`Failed to fetch price after ${retries} attempts.`);
         return 0;
       }
+      // Add a backoff delay before retrying
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
   return 0;
