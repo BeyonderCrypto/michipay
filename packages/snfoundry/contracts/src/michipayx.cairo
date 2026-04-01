@@ -181,7 +181,7 @@ pub mod MichiPayContract {
                     total_debt += debt;
                 }
                 i += 1;
-            };
+            }
 
             total_debt
         }
@@ -198,7 +198,9 @@ pub mod MichiPayContract {
             self.debts.entry((session_id, user)).read()
         }
 
-        fn get_session_participants(self: @ContractState, session_id: u32) -> Array<ContractAddress> {
+        fn get_session_participants(
+            self: @ContractState, session_id: u32,
+        ) -> Array<ContractAddress> {
             let mut result = ArrayTrait::new();
             let count = self.session_participants_count.entry(session_id).read();
             let mut i: u32 = 0;
@@ -208,7 +210,7 @@ pub mod MichiPayContract {
                 }
                 result.append(self.session_participants.entry((session_id, i)).read());
                 i += 1;
-            };
+            }
             result
         }
     }

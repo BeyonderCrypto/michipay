@@ -11,6 +11,11 @@ Este proyecto fue desarrollado utilizando [Scaffold-Stark 2](https://github.com/
 
 *Nota técnica:* Michipay ha sido optimizado y configurado específicamente para operar en la red **Starknet Sepolia Testnet** de manera nativa, facilitando el desarrollo y las pruebas comunitarias.
 
+## 🌐 Demo en Vivo
+
+Puedes probar la aplicación desplegada actualmente en:  
+🚀 **[michipay-dapp.vercel.app](https://michipay-dapp.vercel.app/)**
+
 ## ✨ Características Principales
 
 * 📝 **Creación de Cuentas:** Crea un nuevo evento (ej. "Cena del viernes", "Viaje a la playa") y establece el monto total a dividir.
@@ -49,17 +54,29 @@ Antes de comenzar, asegúrate de tener instalado:
    yarn install
    ```
 
-2. **Configura tu entorno (.env):**
-   Dirígete a la carpeta interactiva de contratos inteligentes y crea tu archivo de entorno a partir de la plantilla:
+2. **Configura tus variables de entorno (.env):**
+   Debes configurar dos archivos, uno para los contratos inteligentes y otro para la interfaz gráfica.
+
+   *Para los Contratos Inteligentes:*
+   Dirígete a la carpeta de contratos y crea tu archivo de entorno a partir de la plantilla:
    ```bash
    cd packages/snfoundry
    cp .env.example .env
    ```
-   Abre el archivo `.env` recién creado con tu editor favorito y asegúrate de proveer las credenciales necesarias de tu cuenta en Sepolia (con fondos de prueba en ETH o STRK):
-   * `ACCOUNT_ADDRESS`: La dirección pública o *address* de tu cuenta en Sepolia.
-   * `PRIVATE_KEY`: Tu llave privada, encargada de firmar la transacción de despliegue.
-   * `RPC_URL`: Ingresa el endpoint RPC válido correspondiente a Starknet Sepolia Testnet (por ejemplo, los proveídos por Alchemy, Blastapi o Infura).
+   Abre el archivo `.env` recién creado y asegúrate de proveer las credenciales necesarias de tu cuenta en Sepolia (con fondos de prueba en ETH o STRK):
+   * `ACCOUNT_ADDRESS`: y `PRIVATE_KEY`: La dirección y llave privada de tu cuenta en Sepolia, encargada de firmar la transacción de despliegue.
+   * `RPC_URL`: Ingresa el endpoint RPC válido correspondiente a Starknet Sepolia Testnet (por ejemplo, de Alchemy).
 
+   *Para tu Interfaz Web (Frontend):*
+   Desde la raíz del proyecto, ingresa a la carpeta Next.js:
+   ```bash
+   cd ../nextjs
+   cp .env.example .env.local
+   ```
+   Abre el archivo `.env.local` y agrega tus endpoints en las variables como `NEXT_PUBLIC_SEPOLIA_PROVIDER_URL` para que la página pueda consultar la blockchain. Y finalmente regresa a `packages/snfoundry` para compilar.
+   ```bash
+   cd ../snfoundry
+   ```
 3. **Consideraciones antes de compilar:**
    * Michipay y sus contratos incluyen pequeños ajustes en su `Scarb.toml` destinados a asegurar que el despliegue a Sepolia y la generación del ABI corran sin problemas a nivel sistema operativo.
    * Por ello, observarás que la dependencia *dev* `snforge_std` ha sido temporalmente comentada, eludiendo errores de compilación nativos de Rust. **No la descomentes** a menos que estés trabajando en flujos exclusivos de testing local con snforge.
@@ -77,14 +94,29 @@ Antes de comenzar, asegúrate de tener instalado:
    > `npx ts-node scripts-ts/helpers/deploy-wrapper.ts --network sepolia`
 
 5. **Inicia el Frontend en Next.js:**
-   Una vez que el contrato en Cairo fue exitosamente desplegado y está disponible a través de tu RPC en Sepolia (tarda unos segundos), dirígete hacia la carpeta de frontend para arrancar el servidor web.
+   Una vez que el contrato en Cairo fue exitosamente desplegado y está disponible a través de tu RPC en Sepolia (tarda unos segundos), dirígete hacia la **carpeta raíz** (`michipay`) para arrancar el servidor web utilizando los comandos integrados:
    ```bash
-   cd ../nextjs
+   cd ../..
    yarn start
    ```
-
 6. **¡Explora Michipay!**
    Abre en tu navegador `http://localhost:3000` para interactuar con la dApp. Asegúrate de que la wallet en tu explorador esté apuntando a Sepolia de la misma forma, para que logres la interacción completa.
+
+## 🔗 Enlaces Útiles y Recursos
+
+### 💰 Faucets (Fondos de Prueba)
+Para interactuar con la red Sepolia, necesitarás ETH o STRK de prueba. Puedes obtenerlos aquí:
+* [Starknet Faucet (Oficial)](https://faucet.starknet.io/)
+* [Blast Starknet Faucet](https://blastapi.io/faucets/starknet-sepolia)
+
+### 👛 Wallets Compatibles
+* [Braavos Wallet](https://braavos.app/download-braavos-wallet/)
+* [Ready Wallet](https://www.ready.co/es-ar/download-ready-wallet)
+* [Argent X](https://www.argent.xyz/argent-x/)
+
+### 🔍 Exploradores y Herramientas
+* [Voyager (Explorador de Starknet)](https://voyager.online/)
+* [Scaffold-Stark 2](https://scaffoldstark.com/)
 
 ## 🤝 Contribuciones
 

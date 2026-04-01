@@ -7,7 +7,7 @@ export async function GET() {
       {
         // Cachear en el servidor por 5 minutos para evitar Rate Limits de la IP del servidor
         next: { revalidate: 300 },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -22,7 +22,7 @@ export async function GET() {
     // para que la dApp siga funcionando en modo testnet/desarrollo
     return NextResponse.json(
       { starknet: { usd: 0.5, mxn: 10.0 } },
-      { status: 200 }
+      { status: 200 },
     );
   }
 }

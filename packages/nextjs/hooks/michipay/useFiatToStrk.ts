@@ -23,10 +23,13 @@ export const useFiatToStrk = () => {
         setExchangeRateUsd(data.starknet.usd);
         setExchangeRateMxn(data.starknet.mxn);
       } catch (err: any) {
-        console.warn("MICHIPAY: Using fallback STRK rates due to API error:", err.message);
+        console.warn(
+          "MICHIPAY: Using fallback STRK rates due to API error:",
+          err.message,
+        );
         setError(err.message || "Unknown error fetching exchange rates");
-        setExchangeRateUsd(0.5);   // Fallback testnet rate
-        setExchangeRateMxn(10.0);  // Fallback testnet rate
+        setExchangeRateUsd(0.5); // Fallback testnet rate
+        setExchangeRateMxn(10.0); // Fallback testnet rate
       } finally {
         setIsLoading(false);
       }
