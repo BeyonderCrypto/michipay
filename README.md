@@ -107,12 +107,10 @@ Antes de comenzar, asegúrate de tener instalado:
 ### 💰 Faucets (Fondos de Prueba)
 Para interactuar con la red Sepolia, necesitarás ETH o STRK de prueba. Puedes obtenerlos aquí:
 * [Starknet Faucet (Oficial)](https://faucet.starknet.io/)
-* [Blast Starknet Faucet](https://blastapi.io/faucets/starknet-sepolia)
 
 ### 👛 Wallets Compatibles
 * [Braavos Wallet](https://braavos.app/download-braavos-wallet/)
 * [Ready Wallet](https://www.ready.co/es-ar/download-ready-wallet)
-* [Argent X](https://www.argent.xyz/argent-x/)
 
 ### 🔍 Exploradores y Herramientas
 * [Voyager (Explorador de Starknet)](https://voyager.online/)
