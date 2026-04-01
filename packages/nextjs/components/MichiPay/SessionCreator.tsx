@@ -1,19 +1,18 @@
 "use client";
 
+
 import { useState } from "react";
-import { CallData } from "starknet";
-import {
-  useDeployedContractInfo,
-  useTransactor,
-} from "~~/hooks/scaffold-stark";
+import { useProvider } from "@starknet-react/core";
+import { useScaffoldWriteContract } from "~~/hooks/scaffold-stark/useScaffoldWriteContract";
 import { useFiatToStrk } from "~~/hooks/michipay/useFiatToStrk";
 import { useAddressBook } from "~~/hooks/michipay/useAddressBook";
 
-export const SessionCreator = () => {
+export const SessionCreator = ({ onSuccess, onCancel }: { onSuccess?: () => void; onCancel?: () => void }) => {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState<"USD" | "MXN">("MXN");
   const [participants, setParticipants] = useState<string[]>([""]); // Start with 1 empty input
   const [isTxPending, setIsTxPending] = useState(false);
+  const { provider } = useProvider();
 
   const {
     convertFiatToStrkU256,
@@ -21,10 +20,6 @@ export const SessionCreator = () => {
     isLoading: ratesLoading,
   } = useFiatToStrk();
   const { contacts, getSuggestions } = useAddressBook();
-
-  const { data: deployedContractData } =
-    useDeployedContractInfo("MichiPayContract");
-  const { writeTransaction } = useTransactor();
 
   const handleAddParticipant = () => {
     if (participants.length < 5) {
@@ -53,58 +48,67 @@ export const SessionCreator = () => {
   const isValid =
     validParticipants.length >= 2 &&
     validParticipants.length <= 5 &&
-    Number(amount) > 0;
+    Number(amount) > 0 &&
+    !ratesLoading;
+
+  const { sendAsync: createSessionTx } = useScaffoldWriteContract({
+    contractName: "MichiPayContract",
+    functionName: "create_session",
+    args: [
+      convertFiatToStrkU256(Number(amount || 0), currency) as any,
+      validParticipants as any,
+    ],
+  });
 
   const handleSubmit = async () => {
-    if (!isValid || !deployedContractData) return;
+    if (!isValid) return;
 
     try {
       setIsTxPending(true);
-      const amountU256 = convertFiatToStrkU256(Number(amount), currency);
-      if (!amountU256) throw new Error("Invalid amount conversion");
-
-      // We explicitly compile Calldata for the tx array payload
-      // writeTransaction from useTransactor expects an array of Calls
-      await writeTransaction([
-        {
-          contractAddress: deployedContractData.address,
-          entrypoint: "create_session",
-          calldata: CallData.compile([
-            amountU256 as any,
-            validParticipants as any,
-          ]),
-        },
-      ]);
-      console.log("Session created successfully");
+      const txHash = await createSessionTx();
+      if (txHash) {
+        await provider.waitForTransaction(txHash);
+      }
+      console.log("Sesión creada exitosamente");
       // Reset form on success
       setAmount("");
       setParticipants([""]);
+      if (onSuccess) onSuccess();
     } catch (e) {
-      console.error("Failed to create session:", e);
+      console.error("Error al crear la sesión:", e);
     } finally {
       setIsTxPending(false);
     }
   };
 
   return (
-    <div className="card bg-base-100 shadow-xl border border-primary/20">
-      <div className="card-body">
-        <h2 className="card-title text-2xl text-primary">Split a Bill</h2>
+    <div className="card bg-base-100/90 shadow-2xl border border-base-200 backdrop-blur-md transition-all">
+      <div className="card-body p-6 md:p-8">
+        <div className="flex items-center gap-3 mb-4">
+          {onCancel && (
+            <button className="btn btn-ghost btn-circle btn-sm shadow-sm border border-base-200 hover:bg-base-200 transition-colors" onClick={onCancel} disabled={isTxPending}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-base-content/70" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          )}
+          <h2 className="card-title text-2xl md:text-3xl font-extrabold text-base-content tracking-tight m-0">Dividir una Cuenta</h2>
+        </div>
 
-        <div className="form-control w-full my-2">
-          <label className="label">
-            <span className="label-text">Total Bill Amount</span>
+        <div className="form-control w-full my-3">
+          <label className="label pb-1">
+            <span className="label-text font-semibold text-base-content/90">Monto Total de la Cuenta</span>
             <span className="label-text-alt">
               {ratesLoading
-                ? "Loading rates..."
+                ? "Cargando tasas..."
                 : `Est: ${convertFiatToStrkDisplay(Number(amount || 0), currency)?.toFixed(4) || "0.0000"} STRK`}
             </span>
           </label>
-          <div className="join w-full">
+          <div className="join w-full shadow-sm rounded-lg overflow-hidden border border-base-300">
             <input
               type="number"
               placeholder="0.00"
-              className="input input-bordered join-item w-full"
+              className="input bg-base-100 focus:outline-none focus:ring-0 join-item w-full transition-all text-lg font-medium"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               min="0"
@@ -121,22 +125,22 @@ export const SessionCreator = () => {
           </div>
         </div>
 
-        <div className="divider my-0"></div>
+        <div className="divider my-4 opacity-70"></div>
 
-        <div className="flex justify-between items-center mb-2">
-          <span className="label-text font-medium">Participants (2-5)</span>
-          <span className="text-xs opacity-70">
-            {validParticipants.length}/5 Valid
+        <div className="flex justify-between items-center mb-4">
+          <span className="label-text font-semibold text-base-content/90 text-sm uppercase tracking-wide">Participantes (2-5)</span>
+          <span className="badge badge-sm badge-neutral/20 border-0 bg-base-200 text-base-content/80 font-medium px-2 py-3 rounded-md">
+            {validParticipants.length}/5 Válidos
           </span>
         </div>
 
         {participants.map((participant, idx) => (
-          <div key={idx} className="flex gap-2 mb-2">
-            <div className="relative w-full">
+          <div key={idx} className="flex gap-2 mb-3 items-center group">
+            <div className="relative w-full shadow-sm">
               <input
                 type="text"
-                placeholder="Address (0x...) or Alias..."
-                className="input input-bordered w-full input-sm"
+                placeholder="Dirección (0x...) o Alias..."
+                className="input input-bordered border-base-300 bg-base-100 focus:border-secondary focus:ring-1 focus:ring-secondary w-full transition-all"
                 value={participant}
                 onChange={(e) => updateParticipant(idx, e.target.value)}
                 list={`contacts-list-${idx}`}
@@ -151,13 +155,13 @@ export const SessionCreator = () => {
             </div>
 
             <button
-              className="btn btn-square btn-sm btn-error btn-outline"
+              className="btn btn-square btn-ghost text-error/60 hover:bg-error hover:text-error-content transition-colors"
               onClick={() => handleRemoveParticipant(idx)}
               disabled={participants.length <= 1}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
+                className="h-5 w-5"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -174,30 +178,30 @@ export const SessionCreator = () => {
         ))}
 
         <button
-          className="btn btn-sm btn-outline btn-block mt-2"
+          className="btn btn-ghost border border-base-300 bg-base-200/50 hover:bg-base-200 hover:border-base-300 text-base-content/80 font-medium btn-block mt-2 shadow-sm rounded-xl transition-all"
           onClick={handleAddParticipant}
           disabled={participants.length >= 5}
         >
-          + Add Participant
+          + Añadir Participante
         </button>
 
-        <div className="card-actions justify-end mt-6">
+        <div className="card-actions justify-end mt-8">
           <button
-            className="btn btn-primary w-full"
+            className="btn btn-secondary text-white border-0 w-full shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all rounded-xl text-lg font-bold"
             disabled={!isValid || isTxPending}
             onClick={handleSubmit}
           >
             {isTxPending ? (
               <span className="loading loading-spinner"></span>
             ) : (
-              "Create Session"
+              "Crear Sesión"
             )}
           </button>
         </div>
 
         {!isValid && amount && participants.length > 0 && (
           <p className="text-warning text-sm mt-2 text-center">
-            Need 2 to 5 valid Starknet addresses to create a session.
+            Se requieren de 2 a 5 direcciones de Starknet válidas para crear una sesión.
           </p>
         )}
       </div>

@@ -54,12 +54,12 @@ export const PaymentEngine = ({
     setErrorMsg(null);
     try {
       await sendAsync();
-      console.log(`Payment successful for session ${sessionId}`);
+      console.log(`Pago exitoso para la sesión ${sessionId}`);
     } catch (err: any) {
-      console.error("Payment failed", err);
+      console.error("Pago fallido", err);
       // Catch common wallet rejection or network errors
       setErrorMsg(
-        err.message || "User rejected the transaction or an error occurred.",
+        err.message || "El usuario rechazó la transacción o ocurrió un error.",
       );
     }
   };
@@ -67,7 +67,7 @@ export const PaymentEngine = ({
   if (!address) {
     return (
       <p className="text-sm text-center italic mt-2 opacity-70">
-        Connect wallet to pay
+        Conecta tu wallet para pagar
       </p>
     );
   }
@@ -75,17 +75,17 @@ export const PaymentEngine = ({
   return (
     <div className="flex flex-col gap-2 mt-4">
       <button
-        className="btn btn-primary w-full shadow-lg"
+        className="btn btn-secondary bg-gradient-modal text-white border-0 w-full shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
         onClick={handlePayment}
         disabled={isPending || amountOwed <= 0n}
       >
         {isPending ? (
           <>
             <span className="loading loading-spinner"></span>
-            Processing (Sepolia)...
+            Procesando (Sepolia)...
           </>
         ) : (
-          `Pay My Share (${(Number(amountOwed) / 1e18).toFixed(4)} STRK)`
+          `Pagar Mi Parte (${(Number(amountOwed) / 1e18).toFixed(4)} STRK)`
         )}
       </button>
 

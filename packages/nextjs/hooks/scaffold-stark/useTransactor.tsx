@@ -110,7 +110,7 @@ export const useTransactor = (
       );
       resetStates();
     }
-  }, [txResult]);
+  }, [txResult, txStatus, notificationId, blockExplorerTxURL]);
 
   const writeTransaction = async (
     tx: Call[],

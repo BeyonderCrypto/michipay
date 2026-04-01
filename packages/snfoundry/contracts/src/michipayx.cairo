@@ -23,6 +23,11 @@ pub trait IMichiPay<TContractState> {
     ) -> u32;
     fn pay_share(ref self: TContractState, session_id: u32);
     fn claim_funds(ref self: TContractState, session_id: u32);
+    fn get_user_debt(self: @TContractState, user: ContractAddress) -> u256;
+    fn get_session(self: @TContractState, session_id: u32) -> MichiSession;
+    fn get_session_counter(self: @TContractState) -> u32;
+    fn get_session_debt(self: @TContractState, session_id: u32, user: ContractAddress) -> u256;
+    fn get_session_participants(self: @TContractState, session_id: u32) -> Array<ContractAddress>;
 }
 
 #[starknet::contract]
@@ -39,6 +44,8 @@ pub mod MichiPayContract {
         session_counter: u32,
         sessions: Map<u32, MichiSession>,
         debts: Map<(u32, ContractAddress), u256>,
+        session_participants_count: Map<u32, u32>,
+        session_participants: Map<(u32, u32), ContractAddress>,
     }
 
     #[event]
@@ -88,16 +95,21 @@ pub mod MichiPayContract {
             let creator = get_caller_address();
             let session_id = self.session_counter.read() + 1;
             let amount_per_person = total_amount / num_participants.into();
+            let num_participants_u32: u32 = num_participants.try_into().unwrap();
 
-            let mut i: usize = 0;
+            let mut i: u32 = 0;
             loop {
-                if i == num_participants {
+                if i == num_participants_u32 {
                     break;
                 }
-                let participant_address = *participants.at(i);
+                let i_usize: usize = i.try_into().unwrap();
+                let participant_address = *participants.at(i_usize);
                 self.debts.entry((session_id, participant_address)).write(amount_per_person);
+                self.session_participants.entry((session_id, i)).write(participant_address);
                 i += 1;
             }
+
+            self.session_participants_count.entry(session_id).write(num_participants_u32);
 
             let new_session = MichiSession {
                 creator: creator, total_amount: total_amount, amount_collected: 0, is_active: true,
@@ -152,6 +164,52 @@ pub mod MichiPayContract {
             assert(success, 'Fallo el retiro');
 
             self.emit(FundsClaimed { session_id, creator: caller, amount: amount_to_transfer });
+        }
+
+        fn get_user_debt(self: @ContractState, user: ContractAddress) -> u256 {
+            let mut total_debt: u256 = 0;
+            let counter = self.session_counter.read();
+            let mut i: u32 = 1;
+
+            loop {
+                if i > counter {
+                    break;
+                }
+                let session = self.sessions.entry(i).read();
+                if session.is_active {
+                    let debt = self.debts.entry((i, user)).read();
+                    total_debt += debt;
+                }
+                i += 1;
+            };
+
+            total_debt
+        }
+
+        fn get_session(self: @ContractState, session_id: u32) -> MichiSession {
+            self.sessions.entry(session_id).read()
+        }
+
+        fn get_session_counter(self: @ContractState) -> u32 {
+            self.session_counter.read()
+        }
+
+        fn get_session_debt(self: @ContractState, session_id: u32, user: ContractAddress) -> u256 {
+            self.debts.entry((session_id, user)).read()
+        }
+
+        fn get_session_participants(self: @ContractState, session_id: u32) -> Array<ContractAddress> {
+            let mut result = ArrayTrait::new();
+            let count = self.session_participants_count.entry(session_id).read();
+            let mut i: u32 = 0;
+            loop {
+                if i == count {
+                    break;
+                }
+                result.append(self.session_participants.entry((session_id, i)).read());
+                i += 1;
+            };
+            result
         }
     }
 }

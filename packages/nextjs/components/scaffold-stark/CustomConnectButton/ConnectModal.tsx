@@ -83,7 +83,7 @@ const ConnectModal = () => {
         htmlFor="connect-modal"
         className="rounded-[18px] btn-sm  font-bold px-8 bg-btn-wallet py-3 cursor-pointer"
       >
-        <span>Connect</span>
+        <span>Conectar</span>
       </label>
       <input
         ref={modalRef}
@@ -96,10 +96,10 @@ const ConnectModal = () => {
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold">
               {isBurnerWallet
-                ? "Choose account"
+                ? "Elegir cuenta"
                 : showOtherOptions
-                  ? "Other Wallet Options"
-                  : "Connect a Wallet"}
+                  ? "Otras Opciones de Wallet"
+                  : "Conectar una Wallet"}
             </h3>
             <label
               onClick={() => {
@@ -130,7 +130,7 @@ const ConnectModal = () => {
                         className="btn btn-ghost rounded-md mt-4 font-normal text-base"
                         onClick={() => setShowOtherOptions(true)}
                       >
-                        Other Options
+                        Otras Opciones
                       </button>
                     )}
                   </>
@@ -148,7 +148,7 @@ const ConnectModal = () => {
                       className="btn btn-ghost font-normal text-base mt-4 rounded-md"
                       onClick={() => setShowOtherOptions(false)}
                     >
-                      Back
+                      Volver
                     </button>
                   </>
                 )

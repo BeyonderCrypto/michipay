@@ -22,11 +22,11 @@ type HeaderMenuLink = {
 
 export const menuLinks: HeaderMenuLink[] = [
   {
-    label: "Home",
+    label: "Inicio",
     href: "/",
   },
   {
-    label: "Debug Contracts",
+    label: "Depurar Contratos",
     href: "/debug",
     icon: <BugAntIcon className="h-4 w-4" />,
   },
@@ -169,7 +169,7 @@ export const Header = () => {
       <div className="navbar-end grow mr-2 gap-4">
         {status === "connected" && !isDeployed ? (
           <span className="bg-[#8a45fc] text-[9px] p-1 text-white">
-            Wallet Not Deployed
+            Wallet No Desplegada
           </span>
         ) : null}
         <CustomConnectButton />

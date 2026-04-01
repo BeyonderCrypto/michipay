@@ -7,7 +7,7 @@ const deployedContracts = {
   sepolia: {
     MichiPayContract: {
       address:
-        "0x2a03de72a8b5068c6e65428bd1db224c4cc9745f8a0d36116b89a2ad0ad361a",
+        "0x3d97fe98a952186f538fdada5fd49eecc07c42b4a2fdcffae0e770d941074e4",
       abi: [
         {
           type: "impl",
@@ -25,6 +25,42 @@ const deployedContracts = {
             {
               name: "high",
               type: "core::integer::u128",
+            },
+          ],
+        },
+        {
+          type: "enum",
+          name: "core::bool",
+          variants: [
+            {
+              name: "False",
+              type: "()",
+            },
+            {
+              name: "True",
+              type: "()",
+            },
+          ],
+        },
+        {
+          type: "struct",
+          name: "contracts::michipayx::MichiSession",
+          members: [
+            {
+              name: "creator",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "total_amount",
+              type: "core::integer::u256",
+            },
+            {
+              name: "amount_collected",
+              type: "core::integer::u256",
+            },
+            {
+              name: "is_active",
+              type: "core::bool",
             },
           ],
         },
@@ -75,6 +111,85 @@ const deployedContracts = {
               ],
               outputs: [],
               state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_user_debt",
+              inputs: [
+                {
+                  name: "user",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_session",
+              inputs: [
+                {
+                  name: "session_id",
+                  type: "core::integer::u32",
+                },
+              ],
+              outputs: [
+                {
+                  type: "contracts::michipayx::MichiSession",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_session_counter",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u32",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_session_debt",
+              inputs: [
+                {
+                  name: "session_id",
+                  type: "core::integer::u32",
+                },
+                {
+                  name: "user",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_session_participants",
+              inputs: [
+                {
+                  name: "session_id",
+                  type: "core::integer::u32",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::array::Array::<core::starknet::contract_address::ContractAddress>",
+                },
+              ],
+              state_mutability: "view",
             },
           ],
         },
@@ -178,7 +293,7 @@ const deployedContracts = {
         },
       ],
       classHash:
-        "0x761aa8da4547016c9684b756178c7fa12674dea27c10be193a944b7d79a867a",
+        "0x613044d244cecff9e9c6450edf94c97e9ef69a6b23575d976be49bb66148076",
     },
   },
 } as const;

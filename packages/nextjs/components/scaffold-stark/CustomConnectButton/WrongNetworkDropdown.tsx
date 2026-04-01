@@ -19,10 +19,10 @@ export const WrongNetworkDropdown = () => {
       localStorage.removeItem("lastConnectionTime");
       setWasDisconnectedManually(true);
       window.dispatchEvent(new Event("manualDisconnect"));
-      notification.success("Disconnect successfully!");
+      notification.success("¡Desconectado exitosamente!");
     } catch (err) {
       console.error(err);
-      notification.success("Disconnect failure!");
+      notification.success("¡Error al desconectar!");
     }
   };
 
@@ -32,7 +32,7 @@ export const WrongNetworkDropdown = () => {
         tabIndex={0}
         className="btn btn-error btn-sm dropdown-toggle gap-1"
       >
-        <span>Wrong network</span>
+        <span>Red incorrecta</span>
         <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0" />
       </label>
 
@@ -49,7 +49,7 @@ export const WrongNetworkDropdown = () => {
             onClick={handleDisconnect}
           >
             <ArrowLeftEndOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0" />
-            <span>Disconnect</span>
+            <span>Desconectar</span>
           </button>
         </li>
       </ul>

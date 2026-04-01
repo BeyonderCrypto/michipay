@@ -91,10 +91,10 @@ export const AddressInfoDropdown = ({
       localStorage.removeItem("lastConnectionTime");
       setWasDisconnectedManually(true);
       window.dispatchEvent(new Event("manualDisconnect"));
-      notification.success("Disconnect successfully!");
+      notification.success("¡Desconectado exitosamente!");
     } catch (err) {
       console.log(err);
-      notification.success("Disconnect failure!");
+      notification.success("¡Error al desconectar!");
     }
   };
   return (
@@ -128,7 +128,7 @@ export const AddressInfoDropdown = ({
                   className="text-xl font-normal h-6 w-4 cursor-pointer ml-2 sm:ml-0"
                   aria-hidden="true"
                 />
-                <span className=" whitespace-nowrap">Copy address</span>
+                <span className=" whitespace-nowrap">Copiar dirección</span>
               </div>
             ) : (
               //@ts-ignore
@@ -146,7 +146,7 @@ export const AddressInfoDropdown = ({
                     className="text-xl font-normal h-6 w-4 cursor-pointer ml-2 sm:ml-0"
                     aria-hidden="true"
                   />
-                  <span className=" whitespace-nowrap">Copy address</span>
+                  <span className=" whitespace-nowrap">Copiar dirección</span>
                 </div>
               </CopyToClipboard>
             )}
@@ -157,7 +157,7 @@ export const AddressInfoDropdown = ({
               className="btn-sm !rounded-xl flex gap-3"
             >
               <QrCodeIcon className="h-6 w-4 ml-2 sm:ml-0" />
-              <span className="whitespace-nowrap">View QR Code</span>
+              <span className="whitespace-nowrap">Ver Código QR</span>
             </label>
           </li>
           {chain.network != "devnet" ? (
@@ -173,7 +173,7 @@ export const AddressInfoDropdown = ({
                   rel="noopener noreferrer"
                   className="whitespace-nowrap"
                 >
-                  View on Block Explorer
+                  Ver en el Explorador de Bloques
                 </a>
               </button>
             </li>
@@ -189,7 +189,7 @@ export const AddressInfoDropdown = ({
                 }}
               >
                 <UserCircleIcon className="h-6 w-4 ml-2 sm:ml-0" />
-                <span className="whitespace-nowrap">Switch Account</span>
+                <span className="whitespace-nowrap">Cambiar Cuenta</span>
               </button>
             </li>
           ) : null}
@@ -203,7 +203,7 @@ export const AddressInfoDropdown = ({
                       <div className="flex items-start justify-between p-4 pt-8 rounded-t">
                         <div className="flex justify-center items-center w-11/12">
                           <h2 className="text-lg text-center text-neutral m-0">
-                            Choose Account
+                            Elegir Cuenta
                           </h2>
                         </div>
                         <button
@@ -282,7 +282,7 @@ export const AddressInfoDropdown = ({
               onClick={handleDisconnect}
             >
               <ArrowLeftEndOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0" />{" "}
-              <span>Disconnect</span>
+              <span>Desconectar</span>
             </button>
           </li>
         </ul>

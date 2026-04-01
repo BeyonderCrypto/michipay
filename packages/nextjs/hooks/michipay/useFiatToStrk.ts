@@ -14,10 +14,8 @@ export const useFiatToStrk = () => {
     const fetchRates = async () => {
       try {
         setIsLoading(true);
-        // Using CoinGecko API for Starknet price
-        const response = await fetch(
-          "https://api.coingecko.com/api/v3/simple/price?ids=starknet&vs_currencies=usd,mxn",
-        );
+        // Using local Next.js proxy to bypass frontend CORS & rate limit errors
+        const response = await fetch("/api/prices");
         if (!response.ok) {
           throw new Error("Failed to fetch exchange rates");
         }
@@ -25,7 +23,10 @@ export const useFiatToStrk = () => {
         setExchangeRateUsd(data.starknet.usd);
         setExchangeRateMxn(data.starknet.mxn);
       } catch (err: any) {
+        console.warn("MICHIPAY: Using fallback STRK rates due to API error:", err.message);
         setError(err.message || "Unknown error fetching exchange rates");
+        setExchangeRateUsd(0.5);   // Fallback testnet rate
+        setExchangeRateMxn(10.0);  // Fallback testnet rate
       } finally {
         setIsLoading(false);
       }
@@ -40,7 +41,7 @@ export const useFiatToStrk = () => {
   const convertFiatToStrkU256 = (amount: number, currency: "USD" | "MXN") => {
     const rate = currency === "USD" ? exchangeRateUsd : exchangeRateMxn;
 
-    if (!rate || amount <= 0) return null;
+    if (!rate || amount <= 0) return uint256.bnToUint256(0n);
 
     // Amount in STRK (e.g., 10 USD / 0.5 USD/STRK = 20 STRK)
     const strkAmount = amount / rate;
